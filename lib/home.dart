@@ -13,11 +13,21 @@ class _HomePageState extends State<HomePage> {
   var downloading = false;
   var progressString = "";
   var downloadedMesage = "";
-  var ytLink = 'https://www.youtube.com/watch?v=rh9PwFvMS0I';
-  double progressValue = null;
+  double progressValue;
+  bool isLinkValid = false;
+  TextEditingController _linkTextController = TextEditingController();
 
   @override
   void initState() {
+    _linkTextController.addListener((){
+      if(_linkTextController.text.contains('https://www.youtube.com/watch?v=') || _linkTextController.text.contains('https://youtu.be/'))
+      setState(() {
+        isLinkValid = true;
+      });
+      else setState(() {
+        isLinkValid = false;
+      });
+    });
     super.initState();
   }
 
@@ -38,6 +48,16 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(fontSize: 22, color: Colors.black),
               ),
               SizedBox(height: 24),
+              (!downloading)?Container(
+                padding: EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: _linkTextController,
+                  decoration: InputDecoration(
+                    labelText: 'Video Link',
+                    border: OutlineInputBorder()
+                  ),
+                ),
+              ):Offstage(),
               (!downloading)
                   ? RaisedButton(
                       padding:
@@ -50,9 +70,9 @@ class _HomePageState extends State<HomePage> {
                         'Download',
                         style: TextStyle(color: Colors.white, fontSize: 32),
                       ),
-                      onPressed: () {
-                        downloadVideo(ytLink);
-                      },
+                      onPressed:(isLinkValid)? () {
+                        downloadVideo(_linkTextController.text);
+                      }:null,
                     )
                   : Center(
                       child: Column(
@@ -99,6 +119,8 @@ class _HomePageState extends State<HomePage> {
       });
     });
 
+    _linkTextController.clear();
+
     setState(() {
       downloading = false;
       downloadedMesage = "";
@@ -106,7 +128,6 @@ class _HomePageState extends State<HomePage> {
 
     List<String> titles = List(); 
     videoLinks.keys.forEach((f){
-      print('title ${f.toString()}');
       titles.add(f.toString());
     });
     showModalBottomSheet(
